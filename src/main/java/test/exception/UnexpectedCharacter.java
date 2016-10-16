@@ -1,6 +1,9 @@
 package test.exception;
 
-public class UnexpectedCharacter extends RuntimeException {
+/**
+ * Thrown when an invalid character if found on {@link test.SimpleJsonPath} creation.
+ */
+public class UnexpectedCharacter extends SimpleJsonPathException {
 
     private final Character character;
     private final Integer position;

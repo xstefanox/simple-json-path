@@ -1,14 +1,21 @@
 package test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.jayway.jsonpath.InvalidPathException;
+import java.io.IOException;
 import org.junit.Test;
 import test.exception.EmptyJsonPathException;
 import test.exception.UnexpectedCharacter;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
-public class SimpleJsonPathTest
-{
+public class SimpleJsonPathTest {
+
     @Test
     public void serializeInDotNotation()
     {
@@ -47,5 +54,38 @@ public class SimpleJsonPathTest
     @Test(expected = UnexpectedCharacter.class)
     public void pathShouldNotContacinSpaces() {
         new SimpleJsonPath("store.book with.a.space");
+    }
+
+    @Test(expected = InvalidPathException.class)
+    public void invalidTerminator() {
+        new SimpleJsonPath("this.is.not.valid.");
+    }
+
+    @Test
+    public void deserialization() throws IOException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        SimpleJsonObject simpleJsonObject = objectMapper.readValue(SimpleJsonPathTest.class.getResource("/aSimpleJsonObject.json"), SimpleJsonObject.class);
+
+        assertThat("the deserialized object should not be null", simpleJsonObject.getPath(), notNullValue());
+        assertThat("the deserialized path should be like the input string", simpleJsonObject.getPath().toString(), equalTo("this.is.a.json.path"));
+    }
+
+    @Test
+    public void serialization() throws JsonProcessingException {
+
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(SimpleJsonPath.class, new ToStringSerializer());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(module);
+
+        SimpleJsonObject simpleJsonObject = new SimpleJsonObject();
+        simpleJsonObject.setPath(new SimpleJsonPath("this.is.a.json.path"));
+
+        String serializedObject = objectMapper.writeValueAsString(simpleJsonObject);
+
+        assertThat("the path should have been serialized as the input string", serializedObject, equalTo("{\"path\":\"this.is.a.json.path\"}"));
     }
 }

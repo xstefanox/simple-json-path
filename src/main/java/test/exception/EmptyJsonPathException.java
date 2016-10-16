@@ -1,7 +1,9 @@
 package test.exception;
 
-
-public class EmptyJsonPathException extends RuntimeException {
+/**
+ * Thrown when creating a {@link test.SimpleJsonPath} from an empty string.
+ */
+public class EmptyJsonPathException extends SimpleJsonPathException {
 
     public EmptyJsonPathException() {
         super("empty JSON Path");
