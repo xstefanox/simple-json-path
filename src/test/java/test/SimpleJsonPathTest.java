@@ -61,6 +61,11 @@ public class SimpleJsonPathTest {
         new SimpleJsonPath("this.is.not.valid.");
     }
 
+    @Test(expected = UnexpectedCharacter.class)
+    public void pathShouldNotCountainDoubleDots() {
+        new SimpleJsonPath("this.is.not..valid");
+    }
+
     @Test
     public void deserialization() throws IOException {
 
